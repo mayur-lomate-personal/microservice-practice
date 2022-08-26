@@ -1,5 +1,7 @@
 package com.mayur.customer;
 
+import com.mayur.clients.fraud.FraudCheckResponse;
+import com.mayur.clients.fraud.FraudClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -7,10 +9,13 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class CustomerService {
     @Autowired
-    CustomerRepository customerRepository;
+    private CustomerRepository customerRepository;
 
     @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private FraudClient fraudClient;
 
     public void registerCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
         Customer customer = Customer.builder()
@@ -19,9 +24,11 @@ public class CustomerService {
                 .email(customerRegistrationRequest.getEmail())
                 .build();
         customerRepository.saveAndFlush(customer);
-        FraudCheckResponse fraudCheckResponse = restTemplate.getForObject("http://FRAUD/api/v1/fraud-check/{customerId}",
-                FraudCheckResponse.class,
-                customer.getId());
+
+
+
+        FraudCheckResponse fraudCheckResponse = fraudClient.isFraudster(customer.getId());
+
         if(fraudCheckResponse.getIsFraudster()) {
             throw new IllegalStateException("fraudster");
         }

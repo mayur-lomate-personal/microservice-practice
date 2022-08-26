@@ -1,4 +1,4 @@
-package com.mayur.customer;
+package com.mayur.clients.fraud;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
